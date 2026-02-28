@@ -1,38 +1,36 @@
-# run.ps1 - Script para descargar y ejecutar Biblea (Version Windows estable)
+# =====================================================
+# run.ps1 - Lanzador Biblea con MENU interactivo
+# =====================================================
 
-param(
-    [switch]$Ayuda,
-    [switch]$Version2
-)
-
-# ===============================
-# FUNCION AYUDA
-# ===============================
-function Mostrar-Ayuda {
-    Write-Host "=== Script de Biblea - Ayuda ===" -ForegroundColor Cyan
-    Write-Host ""
-    Write-Host "Uso: .\run.ps1 [opciones]" -ForegroundColor Yellow
-    Write-Host ""
-    Write-Host "Opciones:" -ForegroundColor Green
-    Write-Host "  -Ayuda      : Muestra esta ayuda"
-    Write-Host "  -Version2   : Ejecuta la version 2 (por defecto version 1)"
-    Write-Host ""
-    Write-Host "Ejemplos:"
-    Write-Host "  .\run.ps1"
-    Write-Host "  .\run.ps1 -Version2"
-    Write-Host "  .\run.ps1 -Ayuda"
-}
-
-# ===============================
-# MOSTRAR AYUDA
-# ===============================
-if ($Ayuda) {
-    Mostrar-Ayuda
-    exit 0
-}
-
+Clear-Host
 Write-Host ""
-Write-Host "=== Biblea - Script de Ejecucion Automatica ===" -ForegroundColor Cyan
+Write-Host "=========================================" -ForegroundColor Cyan
+Write-Host "        BIBLEA - MENU DE EJECUCION       " -ForegroundColor Cyan
+Write-Host "=========================================" -ForegroundColor Cyan
+Write-Host ""
+
+# ===============================
+# IR A CARPETA DEL SCRIPT
+# ===============================
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+Set-Location $ScriptDir
+
+# ===============================
+# BUSCAR CARPETA CODIGO
+# ===============================
+if (Test-Path "..\Codigo") {
+    Set-Location "..\Codigo"
+}
+elseif (Test-Path "Codigo") {
+    Set-Location "Codigo"
+}
+else {
+    Write-Host "[ERROR] No se encontro carpeta Codigo" -ForegroundColor Red
+    Read-Host "Presiona Enter para salir"
+    exit
+}
+
+Write-Host "[OK] Carpeta Codigo cargada" -ForegroundColor Green
 Write-Host ""
 
 # ===============================
@@ -43,78 +41,65 @@ try {
     Write-Host "[OK] Python detectado: $pythonVersion" -ForegroundColor Green
 }
 catch {
-    Write-Host "[ERROR] Python no esta instalado o no esta en PATH" -ForegroundColor Red
-    Write-Host "Descargar desde: https://www.python.org/downloads/" -ForegroundColor Yellow
+    Write-Host "[ERROR] Python no instalado" -ForegroundColor Red
     Read-Host "Presiona Enter para salir"
-    exit 1
+    exit
 }
 
-# ===============================
-# VERIFICAR PIP
-# ===============================
-try {
-    $pipVersion = pip --version 2>&1
-    Write-Host "[OK] Pip detectado" -ForegroundColor Green
-}
-catch {
-    Write-Host "[ERROR] Pip no esta disponible" -ForegroundColor Red
-    Read-Host "Presiona Enter para salir"
-    exit 1
-}
+Write-Host ""
 
 # ===============================
 # INSTALAR DEPENDENCIAS
 # ===============================
-Write-Host ""
-
 if (Test-Path "requirements.txt") {
     Write-Host "Instalando dependencias..." -ForegroundColor Yellow
-    pip install -r requirements.txt
-
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "[ERROR] Fallo al instalar dependencias" -ForegroundColor Red
-        Read-Host "Presiona Enter para salir"
-        exit 1
-    }
-
-    Write-Host "[OK] Dependencias instaladas" -ForegroundColor Green
+    pip install -r requirements.txt | Out-Null
 }
-else {
-    Write-Host "requirements.txt no encontrado. Instalando colorama..." -ForegroundColor Yellow
-    pip install colorama
+
+# ===============================
+# BUSCAR ARCHIVOS PYTHON
+# ===============================
+$files = Get-ChildItem -Filter *.py
+
+if ($files.Count -eq 0) {
+    Write-Host "[ERROR] No se encontraron archivos Python" -ForegroundColor Red
+    Read-Host "Presiona Enter para salir"
+    exit
 }
 
 Write-Host ""
+Write-Host "Selecciona la version que deseas ejecutar:" -ForegroundColor Yellow
+Write-Host ""
+
+# Mostrar menu
+for ($i = 0; $i -lt $files.Count; $i++) {
+    Write-Host "[$($i+1)] $($files[$i].Name)" -ForegroundColor White
+}
+
+Write-Host "[0] Salir"
+Write-Host ""
 
 # ===============================
-# EJECUTAR VERSION
+# LEER OPCION
 # ===============================
-if ($Version2) {
+do {
+    $choice = Read-Host "Ingresa el numero"
+} until ($choice -match '^\d+$' -and [int]$choice -ge 0 -and [int]$choice -le $files.Count)
 
-    if (Test-Path "BibleaV2.py") {
-        Write-Host "Ejecutando Biblea Version 2..." -ForegroundColor Yellow
-        python BibleaV2.py
-    }
-    else {
-        Write-Host "[ERROR] No se encontro BibleaV2.py" -ForegroundColor Red
-        Read-Host "Presiona Enter para salir"
-        exit 1
-    }
-
+if ($choice -eq 0) {
+    exit
 }
-else {
 
-    if (Test-Path "bibleaV1.py") {
-        Write-Host "Ejecutando Biblea Version 1..." -ForegroundColor Yellow
-        python bibleaV1.py
-    }
-    else {
-        Write-Host "[ERROR] No se encontro bibleaV1.py" -ForegroundColor Red
-        Read-Host "Presiona Enter para salir"
-        exit 1
-    }
+$selectedFile = $files[$choice - 1].Name
 
-}
+Write-Host ""
+Write-Host "Ejecutando: $selectedFile" -ForegroundColor Cyan
+Write-Host ""
+
+# ===============================
+# EJECUTAR ARCHIVO
+# ===============================
+python "$selectedFile"
 
 # ===============================
 # RESULTADO FINAL
@@ -122,10 +107,10 @@ else {
 Write-Host ""
 
 if ($LASTEXITCODE -eq 0) {
-    Write-Host "[OK] Ejecucion completada correctamente" -ForegroundColor Green
+    Write-Host "[OK] Programa finalizado correctamente" -ForegroundColor Green
 }
 else {
-    Write-Host "[ERROR] El programa finalizo con codigo: $LASTEXITCODE" -ForegroundColor Red
+    Write-Host "[ERROR] El programa termino con codigo: $LASTEXITCODE" -ForegroundColor Red
 }
 
 Write-Host ""
