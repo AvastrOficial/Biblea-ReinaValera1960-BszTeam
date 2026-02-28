@@ -18,6 +18,8 @@ Scripts para estudio bíblico con la versión Reina Valera 1960.
 2. **Descargar el repositorio**
 ```bash
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+powershell -ExecutionPolicy Bypass -File .\run.ps1
 ```
 
 ## ⚠️ IMPORTANTE:
