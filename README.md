@@ -21,6 +21,5 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```
 
 ## ⚠️ IMPORTANTE:
-' Primero extrae el ZIP si aún no lo hiciste.
-
+- Primero extrae el ZIP si aún no lo hiciste.
 - 👉 Clic derecho al .zip → Extraer todo.
