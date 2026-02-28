@@ -1,7 +1,5 @@
 # Biblea-ReinaValera1960-BszTeam
 
-# Biblea - Reina Valera 1960
-
 Scripts para estudio bíblico con la versión Reina Valera 1960.
 
 ## 📋 Requisitos
