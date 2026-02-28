@@ -16,6 +16,6 @@ Scripts para estudio bíblico con la versión Reina Valera 1960.
    cd Biblea-ReinaValera1960-BszTeam
     ```
 2. **Descargar el repositorio**
-```ps1
+```bash
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```
